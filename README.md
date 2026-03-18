@@ -97,6 +97,13 @@ Simply run `./run.sh` again! Docker Compose will automatically recreate the cont
 
 The container maps PulseAudio via socket. Ensure your host system is actually using PulseAudio or PipeWire with the pipewire-pulse compatibility layer. If the container complains about missing `/run/user/1000/pulse/native`, check your host's audio routing. If your UID is not 1000, set `HOST_UID` in your `.env` file.
 
+### **Webcam / Video Calls**
+
+The `run.sh` wrapper automatically detects all `/dev/video*` devices on your host and passes them into the container. If video calls don't show your camera, check that:
+
+1. Your webcam appears under `ls /dev/video*` on the host.
+2. Your user is in the `video` group (`groups` to check, `sudo usermod -aG video $USER` to fix).
+
 ### **Display / X11 Errors**
 
 If you see errors about Cannot open display, ensure you are running X11. The run.sh script automatically runs `xhost +local:docker` to permit the container to draw to your screen. If you are on strict Wayland (without XWayland), you may need to configure additional Wayland socket mappings.
