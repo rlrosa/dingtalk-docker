@@ -82,6 +82,10 @@ RUN usermod -l dingtalk -d /home/dingtalk -m ubuntu && \
 USER dingtalk
 WORKDIR /home/dingtalk
 
+# Create a well-known mount point for file sharing with the host
+RUN mkdir -p /home/dingtalk/Downloads
+VOLUME /home/dingtalk/Downloads
+
 # Environment variables
 ENV DISPLAY=:0
 ENV QT_X11_NO_MITSHM=1

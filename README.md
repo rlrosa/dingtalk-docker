@@ -16,49 +16,70 @@ docker pull rela/dingtalk:latest
 * A Linux desktop environment using X11 (or XWayland).
 * PulseAudio or PipeWire-Pulse for sound.
 
-## **Prebuilt image**
+## **Quick Start (Prebuilt Image)**
 
-1. **Make the scripts executable:**
-
-```
+```bash
 chmod +x run.sh
-```
-
-2. **Run it**
-
-```
 ./run.sh
 ```
 
-## **Installation & Setup**
+The `run.sh` wrapper handles X11 permissions and launches via Docker Compose.
 
-If you'd rather build yourself, then follow the instructions in this section.
+To stop:
 
-1. **Make the scripts executable:**
-
+```bash
+docker compose down
 ```
+
+## **Build From Source**
+
+```bash
 chmod +x build.sh run.sh
-```
-
-2. **Build the Docker Image:**
-
-```
 ./build.sh
-```
-
-*(This downloads the latest .deb from DingTalk, installs necessary GUI/XCB dependencies, and configures the environment).*
-
-3. **Run the Application:**
-
-```
 ./run.sh
+```
+
+## **Configuration**
+
+All configuration is done through environment variables. Copy `.env.example` to `.env` and uncomment the values you want to change:
+
+```bash
+cp .env.example .env
+```
+
+Or pass variables inline:
+
+```bash
+DINGTALK_DOWNLOADS=~/Downloads ./run.sh
+```
+
+| Variable | Default | Description |
+|---|---|---|
+| `DINGTALK_DOWNLOADS` | `/tmp` | Host directory mounted as DingTalk's Downloads folder |
+| `DINGTALK_CONFIG` | `~/.config/dingtalk-docker` | Host directory for persistent login/settings data |
+| `HOST_UID` | `1000` | Your host UID, used to find the PulseAudio socket |
+| `PULSE_COOKIE` | `~/.config/pulse/cookie` | Path to PulseAudio cookie on the host |
+
+## **File Sharing / Downloads**
+
+By default, your host's `/tmp` is mounted into the container at `/home/dingtalk/Downloads`. Inside DingTalk, save or open files from that `Downloads` folder to exchange them with your host.
+
+```bash
+# Linux — use ~/Downloads instead of /tmp
+DINGTALK_DOWNLOADS=~/Downloads ./run.sh
+
+# macOS
+DINGTALK_DOWNLOADS=~/Downloads ./run.sh
+
+# Windows (WSL / Git Bash)
+DINGTALK_DOWNLOADS=/c/Users/me/Downloads ./run.sh
 ```
 
 ## **How Persistence Works**
 
-Docker containers are ephemeral, meaning they wipe their data when they stop. To prevent you from having to log in every time, the `run.sh` script creates a folder on your host machine at `~/.config/dingtalk-docker`.
+Docker containers are ephemeral, meaning they wipe their data when they stop. To prevent you from having to log in every time, the container mounts a folder on your host machine (default `~/.config/dingtalk-docker`).
 
-This folder is mounted directly into the container. All of your DingTalk settings, login tokens, chat caches, and configurations are safely stored here without polluting your actual host `~/.config folder`.
+All of your DingTalk settings, login tokens, chat caches, and configurations are safely stored here without polluting your actual host `~/.config folder`.
 
 ## **Troubleshooting**
 
@@ -70,11 +91,11 @@ Our container is designed with a smart "watchdog" script specifically to handle 
 
 ### **How do I restart the app after closing it?**
 
-Simply run `./run.sh` again! The script will automatically clean up the old stopped container and launch a fresh one, immediately logging you back in using your saved data.
+Simply run `./run.sh` again! Docker Compose will automatically recreate the container and log you back in using your saved data.
 
 ### **No Audio or Microphone**
 
-The container maps PulseAudio via socket. Ensure your host system is actually using PulseAudio or PipeWire with the pipewire-pulse compatibility layer. If the container complains about missing `/run/user/1000/pulse/native`, check your host's audio routing.
+The container maps PulseAudio via socket. Ensure your host system is actually using PulseAudio or PipeWire with the pipewire-pulse compatibility layer. If the container complains about missing `/run/user/1000/pulse/native`, check your host's audio routing. If your UID is not 1000, set `HOST_UID` in your `.env` file.
 
 ### **Display / X11 Errors**
 
