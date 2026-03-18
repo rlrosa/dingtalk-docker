@@ -1,0 +1,5 @@
+# Generated at runtime by run.sh (video device detection)
+docker-compose.override.yml
+
+# User-specific environment
+.env
